@@ -1,0 +1,24 @@
+[project]
+name = "library-system"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Anjan Das", email = "anjandaspc.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "gradio>=6.26.0",
+    "httpx>=0.28.1",
+    "pydantic[email]>=2.13.4",
+    "sqlalchemy>=2.0.52",
+    "uvicorn>=0.52.4",
+]
+
+[project.scripts]
+library-system = "library_system:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
