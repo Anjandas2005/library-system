@@ -26,21 +26,28 @@ A full-stack Library Management System built with **FastAPI** (backend REST API)
 
 ```
 library-system/
-├── src/library_system/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI app entrypoint
-│   ├── database.py          # DB engine/session setup
-│   ├── models.py            # SQLAlchemy ORM models
-│   ├── schemas.py           # Pydantic request/response schemas
-│   ├── crud.py               # Database query logic + fine calculation
-│   ├── frontend.py           # Gradio UI
-│   └── routers/
-│       ├── books.py
-│       ├── members.py
-│       └── transactions.py
+├── backend/
+│   └── library_system/
+│       ├── __init__.py
+│       ├── main.py                # FastAPI app entrypoint
+│       ├── database.py            # DB engine/session setup
+│       ├── models.py              # SQLAlchemy ORM models
+│       ├── schemas.py             # Pydantic request/response schemas
+│       ├── crud.py                 # Database query logic + fine calculation
+│       └── routers/
+│           ├── books.py
+│           ├── members.py
+│           └── transactions.py
+├── frontend/
+│   └── app.py                     # Gradio UI (calls the backend over HTTP)
+├── data/                          # Generated SQLite database (git-ignored)
+│   └── library.db
+├── .gitignore
 ├── pyproject.toml
 └── uv.lock
 ```
+
+> The backend and frontend are fully decoupled — `frontend/app.py` never imports from `backend/`, it only calls the API over HTTP, exactly like any other client would.
 
 ## Data Model
 
@@ -66,13 +73,13 @@ You need two terminals — one for the backend, one for the frontend.
 
 **Terminal 1 — start the backend API:**
 ```bash
-uv run uvicorn library_system.main:app --reload
+uv run uvicorn library_system.main:app --reload --app-dir backend
 ```
 API will be live at `http://127.0.0.1:8000`. Interactive docs: `http://127.0.0.1:8000/docs`.
 
 **Terminal 2 — start the Gradio frontend:**
 ```bash
-uv run python -m library_system.frontend
+uv run python frontend/app.py
 ```
 Gradio will print a local URL (usually `http://127.0.0.1:7860`) — open it in your browser.
 
