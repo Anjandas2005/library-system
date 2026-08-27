@@ -1,8 +1,12 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# SQLite file will be created in your project root as "library.db"
-SQLALCHEMY_DATABASE_URL = "sqlite:///./library.db"
+# Ensure the data/ folder exists relative to wherever the app is run from
+os.makedirs("data", exist_ok=True)
+
+# SQLite file will be created inside the data/ folder as "library.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./data/library.db"
 
 # connect_args is SQLite-specific: allows the same connection to be used
 # across the multiple threads that FastAPI/Gradio may spawn.

@@ -137,7 +137,11 @@ def list_transactions():
 
 # ---------------- UI layout ----------------
 
-with gr.Blocks(title="Library Management System") as demo:
+custom_css = """
+footer {display: none !important}
+"""
+
+with gr.Blocks(title="Library Management System", css=custom_css) as demo:
     gr.Markdown("# 📚 Library Management System")
 
     with gr.Tab("Books & Copies"):
@@ -238,4 +242,4 @@ with gr.Blocks(title="Library Management System") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(css=custom_css)
