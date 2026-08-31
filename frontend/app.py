@@ -1,5 +1,9 @@
 """
-Gradio front-end for the Library Management API.
+Gradio front-end for the Library Management API — multi-page version.
+
+Each major section (Books & Copies, Members, Issue/Return) is now its own
+page with its own URL, instead of being a tab on a single page. Navigation
+between pages is handled by Gradio's built-in navbar.
 
 This file never touches the database directly — every action here calls the
 FastAPI backend over HTTP, exactly like any other client (Postman, a mobile
@@ -148,116 +152,130 @@ custom_css = """
 footer {display: none !important}
 """
 
-with gr.Blocks(title="Library Management System", css=custom_css) as demo:
+# ---- Home page ----
+with gr.Blocks(title="Library Management System") as demo:
     gr.Markdown("# 📚 Library Management System")
+    gr.Markdown(
+        "Welcome. Use the navigation bar above to go to **Books & Copies**, "
+        "**Members**, or **Issue / Return**."
+    )
 
-    with gr.Tab("Books & Copies"):
-        gr.Markdown("### Add a new book title")
-        with gr.Row():
-            isbn_in = gr.Textbox(label="ISBN")
-            title_in = gr.Textbox(label="Title")
-            author_in = gr.Textbox(label="Author")
-        with gr.Row():
-            publisher_in = gr.Textbox(label="Publisher")
-            year_in = gr.Textbox(label="Publication Year")
-            genre_in = gr.Textbox(label="Genre")
-        create_book_btn = gr.Button("Create Book", variant="primary")
-        book_status = gr.Textbox(label="Status", interactive=False)
+# ---- Books & Copies page ----
+with demo.route("Books & Copies", "/books"):
+    gr.Markdown("# 📚 Books & Copies")
 
-        gr.Markdown("### Search / filter books")
-        with gr.Row():
-            search_title_in = gr.Textbox(label="Title contains")
-            search_author_in = gr.Textbox(label="Author contains")
-            search_genre_in = gr.Textbox(label="Genre contains")
-        search_books_btn = gr.Button("Search")
+    gr.Markdown("### Add a new book title")
+    with gr.Row():
+        isbn_in = gr.Textbox(label="ISBN")
+        title_in = gr.Textbox(label="Title")
+        author_in = gr.Textbox(label="Author")
+    with gr.Row():
+        publisher_in = gr.Textbox(label="Publisher")
+        year_in = gr.Textbox(label="Publication Year")
+        genre_in = gr.Textbox(label="Genre")
+    create_book_btn = gr.Button("Create Book", variant="primary")
+    book_status = gr.Textbox(label="Status", interactive=False)
 
-        gr.Markdown("### All books")
-        books_table = gr.Dataframe(headers=["Book ID", "Title", "Author", "ISBN"], interactive=False)
-        refresh_books_btn = gr.Button("Refresh list (clears search)")
+    gr.Markdown("### Search / filter books")
+    with gr.Row():
+        search_title_in = gr.Textbox(label="Title contains")
+        search_author_in = gr.Textbox(label="Author contains")
+        search_genre_in = gr.Textbox(label="Genre contains")
+    search_books_btn = gr.Button("Search")
 
-        gr.Markdown("### Add a physical copy to a book")
-        with gr.Row():
-            copy_book_id_in = gr.Textbox(label="Book ID")
-            barcode_in = gr.Textbox(label="Barcode")
-            shelf_in = gr.Textbox(label="Shelf Location")
-        add_copy_btn = gr.Button("Add Copy", variant="primary")
-        copy_status = gr.Textbox(label="Status", interactive=False)
+    gr.Markdown("### All books")
+    books_table = gr.Dataframe(headers=["Book ID", "Title", "Author", "ISBN"], interactive=False)
+    refresh_books_btn = gr.Button("Refresh list (clears search)")
 
-        gr.Markdown("### Copies for a book")
-        copies_table = gr.Dataframe(headers=["Copy ID", "Barcode", "Status", "Shelf"], interactive=False)
-        view_copies_btn = gr.Button("View Copies for Book ID above")
+    gr.Markdown("### Add a physical copy to a book")
+    with gr.Row():
+        copy_book_id_in = gr.Textbox(label="Book ID")
+        barcode_in = gr.Textbox(label="Barcode")
+        shelf_in = gr.Textbox(label="Shelf Location")
+    add_copy_btn = gr.Button("Add Copy", variant="primary")
+    copy_status = gr.Textbox(label="Status", interactive=False)
 
-        create_book_btn.click(
-            create_book,
-            inputs=[isbn_in, title_in, author_in, publisher_in, year_in, genre_in],
-            outputs=[book_status, books_table],
-        )
-        search_books_btn.click(
-            list_books,
-            inputs=[search_title_in, search_author_in, search_genre_in],
-            outputs=books_table,
-        )
-        refresh_books_btn.click(list_books, outputs=books_table)
-        add_copy_btn.click(
-            add_copy, inputs=[copy_book_id_in, barcode_in, shelf_in], outputs=[copy_status, copies_table]
-        )
-        view_copies_btn.click(list_copies, inputs=copy_book_id_in, outputs=copies_table)
+    gr.Markdown("### Copies for a book")
+    copies_table = gr.Dataframe(headers=["Copy ID", "Barcode", "Status", "Shelf"], interactive=False)
+    view_copies_btn = gr.Button("View Copies for Book ID above")
 
-    with gr.Tab("Members"):
-        gr.Markdown("### Register a new member")
-        with gr.Row():
-            fname_in = gr.Textbox(label="First Name")
-            lname_in = gr.Textbox(label="Last Name")
-        with gr.Row():
-            email_in = gr.Textbox(label="Email")
-            phone_in = gr.Textbox(label="Phone")
-            type_in = gr.Dropdown(["student", "faculty", "public"], label="Membership Type", value="student")
-        create_member_btn = gr.Button("Register Member", variant="primary")
-        member_status = gr.Textbox(label="Status", interactive=False)
+    create_book_btn.click(
+        create_book,
+        inputs=[isbn_in, title_in, author_in, publisher_in, year_in, genre_in],
+        outputs=[book_status, books_table],
+    )
+    search_books_btn.click(
+        list_books,
+        inputs=[search_title_in, search_author_in, search_genre_in],
+        outputs=books_table,
+    )
+    refresh_books_btn.click(list_books, outputs=books_table)
+    add_copy_btn.click(
+        add_copy, inputs=[copy_book_id_in, barcode_in, shelf_in], outputs=[copy_status, copies_table]
+    )
+    view_copies_btn.click(list_copies, inputs=copy_book_id_in, outputs=copies_table)
 
-        gr.Markdown("### All members")
-        members_table = gr.Dataframe(headers=["Member ID", "Name", "Email", "Status"], interactive=False)
-        refresh_members_btn = gr.Button("Refresh list")
+# ---- Members page ----
+with demo.route("Members", "/members"):
+    gr.Markdown("# 👤 Members")
 
-        create_member_btn.click(
-            create_member,
-            inputs=[fname_in, lname_in, email_in, phone_in, type_in],
-            outputs=[member_status, members_table],
-        )
-        refresh_members_btn.click(list_members, outputs=members_table)
+    gr.Markdown("### Register a new member")
+    with gr.Row():
+        fname_in = gr.Textbox(label="First Name")
+        lname_in = gr.Textbox(label="Last Name")
+    with gr.Row():
+        email_in = gr.Textbox(label="Email")
+        phone_in = gr.Textbox(label="Phone")
+        type_in = gr.Dropdown(["student", "faculty", "public"], label="Membership Type", value="student")
+    create_member_btn = gr.Button("Register Member", variant="primary")
+    member_status = gr.Textbox(label="Status", interactive=False)
 
-    with gr.Tab("Issue / Return"):
-        gr.Markdown("### Issue a book")
-        with gr.Row():
-            issue_copy_id_in = gr.Textbox(label="Copy ID")
-            issue_member_id_in = gr.Textbox(label="Member ID")
-            due_date_in = gr.Textbox(label="Due Date (YYYY-MM-DD)")
-        issue_btn = gr.Button("Issue Book", variant="primary")
-        issue_status = gr.Textbox(label="Status", interactive=False)
+    gr.Markdown("### All members")
+    members_table = gr.Dataframe(headers=["Member ID", "Name", "Email", "Status"], interactive=False)
+    refresh_members_btn = gr.Button("Refresh list")
 
-        gr.Markdown("### Check fine / Return a book")
-        with gr.Row():
-            txn_id_in = gr.Textbox(label="Transaction ID")
-        with gr.Row():
-            check_fine_btn = gr.Button("Check Current Fine")
-            return_btn = gr.Button("Return Book", variant="stop")
-        return_status = gr.Textbox(label="Status", interactive=False)
+    create_member_btn.click(
+        create_member,
+        inputs=[fname_in, lname_in, email_in, phone_in, type_in],
+        outputs=[member_status, members_table],
+    )
+    refresh_members_btn.click(list_members, outputs=members_table)
 
-        gr.Markdown("### All transactions")
-        txns_table = gr.Dataframe(
-            headers=["Transaction ID", "Copy ID", "Member ID", "Due Date", "Status", "Fine"],
-            interactive=False,
-        )
-        refresh_txns_btn = gr.Button("Refresh list")
+# ---- Issue / Return page ----
+with demo.route("Issue / Return", "/issue-return"):
+    gr.Markdown("# 🔄 Issue / Return")
 
-        issue_btn.click(
-            issue_book,
-            inputs=[issue_copy_id_in, issue_member_id_in, due_date_in],
-            outputs=[issue_status, txns_table],
-        )
-        check_fine_btn.click(check_fine, inputs=txn_id_in, outputs=return_status)
-        return_btn.click(return_book, inputs=txn_id_in, outputs=[return_status, txns_table])
-        refresh_txns_btn.click(list_transactions, outputs=txns_table)
+    gr.Markdown("### Issue a book")
+    with gr.Row():
+        issue_copy_id_in = gr.Textbox(label="Copy ID")
+        issue_member_id_in = gr.Textbox(label="Member ID")
+        due_date_in = gr.Textbox(label="Due Date (YYYY-MM-DD)")
+    issue_btn = gr.Button("Issue Book", variant="primary")
+    issue_status = gr.Textbox(label="Status", interactive=False)
+
+    gr.Markdown("### Check fine / Return a book")
+    with gr.Row():
+        txn_id_in = gr.Textbox(label="Transaction ID")
+    with gr.Row():
+        check_fine_btn = gr.Button("Check Current Fine")
+        return_btn = gr.Button("Return Book", variant="stop")
+    return_status = gr.Textbox(label="Status", interactive=False)
+
+    gr.Markdown("### All transactions")
+    txns_table = gr.Dataframe(
+        headers=["Transaction ID", "Copy ID", "Member ID", "Due Date", "Status", "Fine"],
+        interactive=False,
+    )
+    refresh_txns_btn = gr.Button("Refresh list")
+
+    issue_btn.click(
+        issue_book,
+        inputs=[issue_copy_id_in, issue_member_id_in, due_date_in],
+        outputs=[issue_status, txns_table],
+    )
+    check_fine_btn.click(check_fine, inputs=txn_id_in, outputs=return_status)
+    return_btn.click(return_book, inputs=txn_id_in, outputs=[return_status, txns_table])
+    refresh_txns_btn.click(list_transactions, outputs=txns_table)
 
 
 if __name__ == "__main__":
