@@ -13,8 +13,19 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[schemas.BookOut])
-def list_books(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.list_books(db, skip, limit)
+def list_books(
+    title: str | None = None,
+    author: str | None = None,
+    genre: str | None = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+):
+    """
+    Lists books. If title, author, or genre are provided, filters
+    results using a case-insensitive partial match on those fields.
+    """
+    return crud.search_books(db, title=title, author=author, genre=genre, skip=skip, limit=limit)
 
 
 @router.get("/{book_id}", response_model=schemas.BookOut)

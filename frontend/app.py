@@ -40,8 +40,15 @@ def create_book(isbn, title, author, publisher, year, genre):
     return f"Book created: #{book['book_id']} — {book['title']}", list_books()
 
 
-def list_books():
-    resp = httpx.get(f"{API_BASE}/books")
+def list_books(title="", author="", genre=""):
+    params = {}
+    if title:
+        params["title"] = title
+    if author:
+        params["author"] = author
+    if genre:
+        params["genre"] = genre
+    resp = httpx.get(f"{API_BASE}/books", params=params)
     if resp.status_code >= 400:
         return [[_fmt_error(resp), "", "", ""]]
     books = resp.json()
@@ -157,9 +164,16 @@ with gr.Blocks(title="Library Management System", css=custom_css) as demo:
         create_book_btn = gr.Button("Create Book", variant="primary")
         book_status = gr.Textbox(label="Status", interactive=False)
 
+        gr.Markdown("### Search / filter books")
+        with gr.Row():
+            search_title_in = gr.Textbox(label="Title contains")
+            search_author_in = gr.Textbox(label="Author contains")
+            search_genre_in = gr.Textbox(label="Genre contains")
+        search_books_btn = gr.Button("Search")
+
         gr.Markdown("### All books")
         books_table = gr.Dataframe(headers=["Book ID", "Title", "Author", "ISBN"], interactive=False)
-        refresh_books_btn = gr.Button("Refresh list")
+        refresh_books_btn = gr.Button("Refresh list (clears search)")
 
         gr.Markdown("### Add a physical copy to a book")
         with gr.Row():
@@ -177,6 +191,11 @@ with gr.Blocks(title="Library Management System", css=custom_css) as demo:
             create_book,
             inputs=[isbn_in, title_in, author_in, publisher_in, year_in, genre_in],
             outputs=[book_status, books_table],
+        )
+        search_books_btn.click(
+            list_books,
+            inputs=[search_title_in, search_author_in, search_genre_in],
+            outputs=books_table,
         )
         refresh_books_btn.click(list_books, outputs=books_table)
         add_copy_btn.click(

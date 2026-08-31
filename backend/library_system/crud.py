@@ -46,6 +46,30 @@ def list_books(db: Session, skip: int = 0, limit: int = 100) -> list[models.Book
     return db.query(models.Book).offset(skip).limit(limit).all()
 
 
+def search_books(
+    db: Session,
+    title: str | None = None,
+    author: str | None = None,
+    genre: str | None = None,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[models.Book]:
+    """
+    Case-insensitive partial match on any combination of title, author, genre.
+    If none of the filters are provided, behaves exactly like list_books.
+    """
+    query = db.query(models.Book)
+
+    if title:
+        query = query.filter(models.Book.title.ilike(f"%{title}%"))
+    if author:
+        query = query.filter(models.Book.author.ilike(f"%{author}%"))
+    if genre:
+        query = query.filter(models.Book.genre.ilike(f"%{genre}%"))
+
+    return query.offset(skip).limit(limit).all()
+
+
 # ---------- Book Copies ----------
 
 def add_book_copy(db: Session, book_id: int, copy: schemas.BookCopyCreate) -> models.BookCopy | None:
